@@ -1,0 +1,105 @@
+= Live network Ansible Playbooks
+
+Ansible playbooks that are mostly portable to be run on live network equipment
+
+. <<Description>>
+. <<Directions on use>>
+. <<Environment Requirements>>
+. <<Key Operations>>
+.. <<Playbook for Live configuration of VLANs>>
+. <<Future TO-DO Goals>>
+
+== Description
+
+This is a collectoion of Playbooks with associated templates, config files, variable examples, that can be used with live network devices to automate gathering of status, backing up of configurations, and other tasks.
+
+GitHub Link: https://github.com/samualblair/ansible-live-network-playbooks
+
+For those in need of configuration generation, or other fully off-line tasks see similar repository for generation of configurations (fully offline, no device connectivity requirements).
+
+GitHub Link: https://github.com/samualblair/ansible-offline-network-playbooks
+
+This repository includes playbooks designed to be mostly portable and require minimal touch/configuration on network equipment. The original intenet was for an engineer to be able to use in medium to large enviornment that the engineer may have access rights but not neccisarly have ownership or long-term mainteance over. Client side plugins are avoided and overal design goal is to allow easy manipulation to fit the need of a given enviornment.
+
+NOTE: The minumum requirement to customize these playbooks is modification of the ansible hosts file. Additional modifications may be required such as adjustments to supported ssh ciphers, adjustments to network conection types or ansible modules. 
+
+The primary benifits are currently the ability to obtain status information (such as running many 'show' commands) as well as running configurations from a large numer of devices.
+
+This selection of playbooks perform different operations, such as backing up configurations , showing/saving status, and/or adding configurations. Be mindful of which playbooks perform which actions, and which have no riks (monitor only) vs some risk (performing changes).
+
+
+== Directions on use
+
+NOTE: These are live playbooks, many not idempotent and running them multiple times will result in different output each time. This also causes a 'Changed' status in ansible output even if no change on device was made. This is expected and acceptable, it is part of the tradeoff made when designing these playbooks to be more accesible and portable. Some playbooks (or future playbooks) may be designed with more idempotentcy in mind.
+
+WARNING: Playbooks designed to make changes can be risky. Take caution to plan ahead, test operations in a lab, dry-run, etc prior to use. Do not use if you are not comfortable with their operations. Playbooks designed for status checks and config backup are much safer, and can be used with much less scrutiny.
+
+* Ensure ansible execution enviornment is ready (see Environment Requirements)
+* Copy/Clone Repository
+* Customize the repository
+** Initial customization should include modification of ansible hosts file
+*** The host file example has several useful groups, and includes hard-coding of mangement IP addressses. This is useful to ensure DNS is not a requirement for performing SSH connectivity to network devices. At minimum add devices and mangement IP addresses to the correct groups.
+** Ensure you have IP connectity to the devices in the hosts file
+** Run ansible playbooks
+** Ansible Playbook will prompt for username and password at runtime
+*** The default expectation is that all devices can use the same credentials
+*** If all devices cannot use the same credentials you can run multiple times, limiting which devices on each run or adjust to further breakout authentication/credentials. The intent in design was to keep it simple and not build in any base requirements for permanant storage of credentials.
+*** By default ansible will attempt to perform connections in parallel, if using 2-factor authentication it may be a requirement to run in serial, so that you have time to respond to each request, instead of getting flooded with requests. This can be done at exectuion with an ansilbe flag.
+*** If issues arise with execution/running of playbook ensure ansible settings match your enviornment (see Environment Requirements) and ensure you have IP connectivty to the network devices
+
+
+== Environment Requirements
+
+NOTE: This is expected to perform live operations on switches. generally gathering information, gathering or saving configurations.
+
+NOTE: Some playbooks can make changes to a Distribution switch - This is not expected to generate a Distribution Switch configuration file, just make live changes. This is not expected to perform live base configurations, only perform live additional configurations.
+
+
+
+Execution enviornment Requirements:
+Should be able to install most sub-dependancies via PIP, PIP3, PIPX, or ansible-galaxy
+
+* Python
+** Ansible
+*** network_cli
+** Jinja2
+
+
+
+== Key Operations
+
+These scripts (playbooks) can be run by executing the Ansible Playbook when ready, your local enviornemnt (system) will reach out to live network devices to perform operations. 
+
+Detailed operations of these Ansible Playbooks:
+
+### Playbook for Live configuration of VLANs
+Can be executed by running "ansible-playbook pb.config_vlan_list.yml".
+Optionally can run a specific portion only of this playbook by leveraging one of the tags "bak,vlan,svi"
+
+This playbook will add VLANs to tunks and configure VLANs L3 Routed Interfacs for the VLAN (SVI/BVI/IRB).
+
+* Playbook pb.config_vlan_list
+** Prompts for username / password (password is 'protected'/hidden from view)
+*** tag bak
+** Creates backup of current configs, saves on client system
+*** tag vlan
+** Generates new vlans (adds vlan # and vlan name)
+*** tag trunk
+** Adds Allowed VLANs to uplink/downlink interfaces
+*** tag svi
+** Adds Layer 3 VLAN interfaces (SVI)
+
+
+
+
+
+
+
+
+
+== Future TO-DO Goals
+
+Continue to improve documentation.
+
+Add additional playbooks.
+Next addition: add loading of full configuration files onto devices (useful for staging of greenfield devices).
