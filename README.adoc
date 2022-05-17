@@ -11,7 +11,7 @@ Ansible playbooks that are mostly portable to be run on live network equipment
 
 == Description
 
-This is a collectoion of Playbooks with associated templates, config files, variable examples, that can be used with live network devices to automate gathering of status, backing up of configurations, and other tasks.
+This is a collection of Playbooks with associated templates, config files, variable examples, that can be used with live network devices to automate gathering of status, backing up of configurations, and other tasks.
 
 GitHub Link: https://github.com/samualblair/ansible-live-network-playbooks
 
@@ -40,11 +40,11 @@ WARNING: Playbooks designed to make changes can be risky. Take caution to plan a
 ** Initial customization should include modification of ansible hosts file
 *** The host file example has several useful groups, and includes hard-coding of mangement IP addressses. This is useful to ensure DNS is not a requirement for performing SSH connectivity to network devices. At minimum add devices and mangement IP addresses to the correct groups.
 ** Ensure you have IP connectity to the devices in the hosts file
-** Run ansible playbooks
+* Run ansible playbooks
 ** Ansible Playbook will prompt for username and password at runtime
 *** The default expectation is that all devices can use the same credentials
 *** If all devices cannot use the same credentials you can run multiple times, limiting which devices on each run or adjust to further breakout authentication/credentials. The intent in design was to keep it simple and not build in any base requirements for permanant storage of credentials.
-*** By default ansible will attempt to perform connections in parallel, if using 2-factor authentication it may be a requirement to run in serial, so that you have time to respond to each request, instead of getting flooded with requests. This can be done at exectuion with an ansilbe flag.
+** By default ansible will attempt to perform connections in parallel, if using 2-factor authentication it may be a requirement to run in serial, so that you have time to respond to each request, instead of getting flooded with requests. This can be done at exectuion with an ansilbe flag.
 *** If issues arise with execution/running of playbook ensure ansible settings match your enviornment (see Environment Requirements) and ensure you have IP connectivty to the network devices
 
 
