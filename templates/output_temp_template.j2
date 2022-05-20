@@ -1,0 +1,31 @@
+
+
+===[ Environment All ]===
+
+{% for var in switch_output %}
+{{ inventory_hostname }},{{ timestamp }},{{var.stdout_lines}}
+{% endfor %}
+
+
+{# below are just notes when originally parsing the data and determining what could be easily filtered in the above loop #}
+
+{#
+===[ Environment All ]===
+{{switch_output.stdout[0]}}
+#}
+
+{#
+{{ switch_output}} 
+#}
+
+{#
+{% for var in switch_output %}
+{{ inventory_hostname }},{{ timestamp }}
+{% endfor %}
+#}
+
+{#
+{% for var in switch_output %}
+{{ inventory_hostname }},{{ timestamp }},{{var}}
+{% endfor %}
+#}
