@@ -8,51 +8,55 @@
 - name: Pull Cisco IOS Information, put in file
   hosts: all
   connection: network_cli
-  gather_facts: no
-  
+  gather_facts: false
+
   vars_prompt:
    - name: "ansible_user"
      prompt: "What is your username? "
-     private: no
+     private: false
 
    - name: "ansible_password"
      prompt: "What is your password? "
-     private: yes
+     private: true
 
   tasks:
-  - name: create timestamp
-    set_fact:
+   - name: create timestamp
+     ansible.builtin.set_fact:
       timestamp: "{{ lookup('pipe','date +%Y-%m-%d-at-%H--%M--%S') }}"
 # removed the colon ":" in timestamp as windows has issues with this when accessing saved files and replaced with double dashes "--"
 
 ## Create folder to store output if not present
-  - name: create directory for output
-    file:
+   - name: create directory for output
+     ansible.builtin.file:
+      # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
+      mode: 0644
       path: ./output
       state: directory
 
 
- ##########################Block for IOS Access Switches##########################  
-  - name: For IOS Switches - Access
-    block:
-    - name: run multiple IOS commands on remote nodes 
-      ios_command:
-        commands:
+# #########################Block for IOS Access Switches##########################
+   - name: For IOS Switches - Access
+     block:
+      - name: run multiple IOS commands on remote nodes
+        cisco.ios.ios_command:
+         commands:
           - show environment all
-      register: switch_output
-# May not work on all devices, to limit to a set of devices such as access switches you can uncomment below
-#    when: "'access' in group_names"
-#    when: "'distriubution' in group_names"
-# Or you can remove device from inventory (easily with comment # in inventory) so only device you want to check are targeted
+        register: switch_output
+        when: "'access' in group_names"
+      # May not work on all devices, to limit to a set of devices such as access switches you can uncomment below
+      # Or you can remove device from inventory (easily with comment # in inventory) so only device you want to check are targeted
+      # when: "'access' in group_names"
+      # when: "'distriubution' in group_names"
 
-# Output for the previous command for all switches is included in one report
-    - name: show output to files
-      template: 
-        src=./templates/output_temp_template.j2
-        dest=./output/full_temperature_report.csv
+      # Output for the previous command for all switches is included in one report
+      - name: show output to files
+        ansible.builtin.template:
+         # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
+         mode: 0644
+         src: ./templates/output_temp_template.j2
+         dest: ./output/full_temperature_report.csv
 
 
 # This playbook / output logic is incomplete
 # The a better version of the playbook and jinja template would be to gather better details and save them in a nicer report
 # Currently all output for the command is stored, but this does acomplish the high level goal of gather the relevent data for a point in time
-
