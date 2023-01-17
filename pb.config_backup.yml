@@ -1,0 +1,67 @@
+---
+# Playbook to obtain and save backup (on and/or off device) configuration once devices are live and reachable
+# Playbook starts by asking the username/password of user
+
+- name: Backup Device Configs
+  hosts:
+    - switches
+    - routers
+    - l3cs
+#    - nexus
+# Not yet working with WLC
+#    - wlc
+#    - asa
+
+  connection: network_cli
+  gather_facts: false
+
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "What is your username? "
+      private: false
+
+    - name: "ansible_password"
+      prompt: "What is your password? "
+      private: true
+
+  tasks:
+    - name: Save running config
+      ios_config:
+        save_when: always
+#      nxos_config:
+#        save_when: always
+#      asa_config:
+#        save_when: always
+#      aireos_config:
+#        save_when: always
+      tags:
+        - save
+
+    - name: Create Directory for configurations
+      ansible.builtin.file:
+        path: ./backup
+        state: directory
+        # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
+        mode: 0644
+      tags:
+        - bak
+
+    - name: Backup Configurations to Config
+      cisco.ios.ios_config:
+        backup: true
+        backup_options:
+          dir_path: ./backup
+#      nxos_config:
+#        backup: yes
+#        backup_options:
+#          dir_path: ./backup
+#      asa_config:
+#        backup: yes
+#        backup_options:
+#          dir_path: ./backup
+#      aireos_config:
+#        backup: yes
+#        backup_options:
+#          dir_path: ./backup
+      tags:
+        - bak
