@@ -6,7 +6,9 @@ Ansible playbooks that are mostly portable to be run on live network equipment
 . <<Directions on use>>
 . <<Environment Requirements>>
 . <<Key Operations>>
-.. <<Playbook for Live configuration of VLANs>>
+.. <<Playbook for Backing Up Device Configurations>>
+.. <<Playbook for obtaining output (show commands) and saving report files>>
+.. <<Playbook for obtaining output and saving report files>>
 . <<Future TO-DO Goals>>
 
 == Description
@@ -30,9 +32,9 @@ This selection of playbooks perform different operations, such as backing up con
 
 == Directions on use
 
-NOTE: These are live playbooks, many not idempotent and running them multiple times will result in different output each time. This also causes a 'Changed' status in ansible output even if no change on device was made. This is expected and acceptable, it is part of the tradeoff made when designing these playbooks to be more accesible and portable. Some playbooks (or future playbooks) may be designed with more idempotentcy in mind.
+NOTE: These are live playbooks, many are not idempotent and running them multiple times will result in different output each time. This also causes a 'Changed' status in ansible output even if no change on device was made. This is expected and acceptable, it is part of the tradeoff made when designing these playbooks to be more accesible and portable. Some playbooks (or future playbooks) may be designed with more idempotentcy in mind.
 
-WARNING: Playbooks designed to make changes can be risky. Take caution to plan ahead, test operations in a lab, dry-run, etc prior to use. Do not use if you are not comfortable with their operations. Playbooks designed for status checks and config backup are much safer, and can be used with much less scrutiny.
+WARNING: Playbooks designed to make changes can be risky. Take caution to plan ahead, test operations in a lab, dry-run, etc prior to use. Do not use if you are not comfortable with their operations. Playbooks designed for status checks and config backup are less risky (no changes to devices), and can be used with much less scrutiny.
 
 * Ensure ansible execution enviornment is ready (see Environment Requirements)
 * Copy/Clone Repository
@@ -54,17 +56,19 @@ NOTE: This is expected to perform live operations on switches. generally gatheri
 
 NOTE: Some playbooks can make changes to a Distribution switch - This is not expected to generate a Distribution Switch configuration file, just make live changes. This is not expected to perform live base configurations, only perform live additional configurations.
 
-
-
-Execution enviornment Requirements:
+Execution Enviornment (EE) Requirements:
 Should be able to install most sub-dependancies via PIP, PIP3, PIPX, or ansible-galaxy
 
 * Python
 ** Ansible
-*** network_cli
+*** Ansible Galaxy Collections: 
+- community.network
+- cisco.ios
+- cisco.asa
+- cisco.nxos
 ** Jinja2
 
-
+If desired a container can be built to be EE , a sample execution-environment.yml is provided.
 
 == Key Operations
 
@@ -72,7 +76,43 @@ These scripts (playbooks) can be run by executing the Ansible Playbook when read
 
 Detailed operations of these Ansible Playbooks:
 
-### Playbook for Live configuration of VLANs
+### Playbook for Backing Up Device Configurations
+Can be executed by running "ansible-playbook pb.config_backup.yml".
+Optionally can run a specific portion only of this playbook by leveraging one of the tags "bak,save"
+
+This playbook will connect to network devices, save the configuration to storage memory (disk/flash).
+The playbook will create a directory for backups in current directory called 'backup' (locally on the system performing execution of playbook), A backup of each device configuration will then be stored in this folder.
+
+
+### Playbook for obtaining output (show commands) and saving report files
+Can be executed by running "ansible-playbook pb.show_output.yml".
+Optionally can run a specific portion only of this playbook by leveraging one of the tags "switch,router,nxos,l3cs"
+
+This playbook will connect to network devices and obtain status information from various 'show' commands.
+Sections are organized by common device funciton, such as access switches (aka L2), agg distribution switches (aka L3 switches platforms/configs), Routers (Router platforms/configs), Firewalls, etc.
+
+Outputs are stored in a folder 'output', one file per device per function with a timestamp.
+Example 1 (host123, 11:00, Layer 2 Core Switch Report): host1.1100.l2_core_switch_report.txt
+Example 2 (hostABC, 04:00,  Firewall Report): hostABC.0400.fw_report.txt
+
+
+### Playbook for obtaining output and saving report files
+Can be executed by running "ansible-playbook pb.Obtaining output.yml".
+
+This playbook will connect to network devices and obtain status information from various 'show' commands related to temperature.
+Output is stored in folder 'output' wand stored into a single report file (csv format), 'full_temperature_report.csv'.
+The csv is built using the template 'templates/output_temp_template.j2'.
+
+NOTE: Pending Improvement - currently comment out and re-run for each similar group of devices, future adjustment may better seperate command sets per device type. The playbook could organized for different platforms to have different commands collected, as slight differences in collection and consolidation are required depending on system (and active configuration), but currently playbook only has one logic block.
+
+
+== Future TO-DO Goals
+Continue to improve documentation, with some enviornment setup instructinos.
+
+### Next additions planned:
+add loading of full configuration files onto devices (useful for staging of greenfield devices)
+
+### PENDING ADD: Playbook for Live configuration of VLANs
 Can be executed by running "ansible-playbook pb.config_vlan_list.yml".
 Optionally can run a specific portion only of this playbook by leveraging one of the tags "bak,vlan,svi"
 
@@ -88,18 +128,3 @@ This playbook will add VLANs to tunks and configure VLANs L3 Routed Interfacs fo
 ** Adds Allowed VLANs to uplink/downlink interfaces
 *** tag svi
 ** Adds Layer 3 VLAN interfaces (SVI)
-
-
-
-
-
-
-
-
-
-== Future TO-DO Goals
-
-Continue to improve documentation.
-
-Add additional playbooks.
-Next addition: add loading of full configuration files onto devices (useful for staging of greenfield devices).
