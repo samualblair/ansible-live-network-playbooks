@@ -42,7 +42,7 @@
         path: ./backup
         state: directory
         # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-        mode: 0644
+        mode: "0644"
       tags:
         - bak
 
