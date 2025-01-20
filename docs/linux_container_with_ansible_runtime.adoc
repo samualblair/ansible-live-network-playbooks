@@ -1,0 +1,52 @@
+= Running in Linux using Ansible
+
+Guide to running in Podman Container
+
+. <<Starting Point - Linux or Mac with Ansible Installed>>
+. <<Building Container File with ansible-build>>
+. <<Run container (choose one style)>>
+.. <<Run using Ansible-Runner>>
+.. <<Run in interactive 'Container' Terminal>>
+
+== Starting Point - Linux or Mac with Ansible Installed
+
+ansible-galaxy collection install -r ansible/requirements.yml
+
+== Building Container File with ansible-build
+```
+# Have ansible installed
+# Have ansible-builder installed
+pipx install ansible-builder
+
+# Choose if podman or docker container will be used
+
+# Build for podman container - Need podman installed
+ansible-builder build --tag live_network_ansible_v1 --container-runtime podman
+
+# Build for Docker container - Need docker installed
+ansible-builder build --tag live_network_ansible_v1 --container-runtime docker
+```
+
+Alternatively - Prepare Container File but do not create (instantiate) a container yet
+```
+ansible-builder create
+```
+
+== Run container (choose one style)
+
+=== Run using Ansible-Runner
+```
+ansible-runner run --process-isolation folder -p playbook.yml --container-image localhost/image_name
+```
+
+=== Run in interactive 'Container' Terminal
+```
+# Start container
+ansible-runner run --process-isolation folder -p playbook.yml --container-image localhost/image_name
+
+# Start container, with shared folder/storage
+# Copy ansible playbooks into that storage
+# Launch container terminal
+# Navigate to playbook folder, and run ansible commands
+```
+

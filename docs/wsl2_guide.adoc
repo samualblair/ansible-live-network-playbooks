@@ -1,0 +1,85 @@
+= Running on Windows (in Linux via WSL2)
+
+Guide to running in WSL2 On Windows
+
+. <<Running in Widows (Linux) using WSL2 with Ubuntu (version default)>>
+. <<Running in Widows (Linux) using WSL2 with Ubuntu 24.04>>
+. <<FUTURE Documentation>>
+
+== Running in Widows (Linux) using WSL2 with Ubuntu (version default)
+Windows must be Windows 10 version 2004 and higher (Build 19041 and +) or Windows 11.
+```
+wsl --install
+
+# To see full list
+wsl --install
+wsl --list --online
+wsl --install -d <DistroName>
+```
+
+== Running in Widows (Linux) using WSL2 with Ubuntu 24.04
+Guide to running in WSL2 VM
+```
+wsl --install -d Ubuntu-24.04
+# Accept Administrative Prompts if terminal was not administrator
+# Restart
+
+# Update package list , and upgrade packages currently installed
+sudo apt update
+sudo apt upgrade
+
+# Install ansible via system package manager (apt)
+sudo apt-get install openssh-client
+# Optional, don't install if not needed
+# sudo apt-get install sshpass
+
+# Install Ansbile
+sudo apt install ansible-core
+sudo apt install python3-ansible-runner
+
+# Future upgrades with apt
+sudo apt update
+sudo apt upgrade
+```
+
+Alternative Ansible Install Option - using Python package manager (pipx) - Not needed if apt used
+```
+sudo apt install python3-pip
+pipx install ansible-core
+pipx install ansible-runner
+
+# Future upgrades with pipx
+pipx upgrade --include-injected ansible
+```
+
+Ansible Galaxy Components to install
+```
+# Found all of these are installed by default on Ubuntu 24.04 after Ansible install
+ansible-galaxy collection install cisco.ios
+ansible-galaxy collection install community.network
+ansible-galaxy collection install cisco.asa
+ansible-galaxy collection install cisco.nxos
+
+# Can confirm with 'ansible-galaxy collection list'
+ansible-galaxy collection list
+ansible-galaxy collection list | grep cisco.nxos
+```
+
+Clone Network Repo 
+```
+# Clone with sytax: git clone [source] [optional-destination]
+# Default destination folder will be same name as source repo
+# Example showing clone into a 'project123' folder
+git clone https://github.com/samualblair/ansible-live-network-playbooks.git project123
+```
+
+== FUTURE Documentation
+
+=== Running in Widows (Linux) using WSL2 with Ubuntu 22.04
+Guide to running in WSL2 VM
+
+=== Running in Widows (Linux) using WSL2 with Fedora
+Guide to running in WSL2 VM
+
+=== Running in Widows (Linux) using WSL2 with Arch
+Guide to running in WSL2 VM
