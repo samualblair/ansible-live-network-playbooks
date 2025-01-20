@@ -1,3 +1,4 @@
+---
 version: 3
 
 images:
@@ -18,4 +19,5 @@ dependencies:
     - name: community.network
     - name: cisco.asa
     - name: cisco.nxos
-    
+  python:
+  - Jinja2
