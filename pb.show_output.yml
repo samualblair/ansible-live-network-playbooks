@@ -22,9 +22,9 @@
   tasks:
 
    # Set a timestamp variable
-   - name: create timestamp
+   - name: Create timestamp
      ansible.builtin.set_fact:
-      timestamp: "{{ lookup('pipe','date +%Y-%m-%d-at-%H--%M--%S') }}"
+      timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d-at-%H--%M--%S') }}"
       # removed the colon ":" in timestamp as windows has issues with this when accessing saved files and replaced with double dashes "--"
      tags:
       - switch
@@ -38,7 +38,7 @@
       path: ./output
       state: directory
       # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-      mode: 0644
+      mode: "0644"
      tags:
       - switch
       - router
@@ -47,8 +47,11 @@
 
 # #########################Block for IOS Access Switches##########################
    - name: For IOS Switches - Access
+     when: "'access' in group_names"
+     tags:
+      - switch
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show version
@@ -65,20 +68,20 @@
           - show stack-power detail
         register: switch_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_switch_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.switch_report.txt
-     when: "'access' in group_names"
-     tags:
-      - switch
 
 # ##########################Block for IOS Aggregation/Distribution Switches##########################
    - name: For IOS Switches - Agg/Dist
+     when: "'distriubution' in group_names"
+     tags:
+      - switch
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show version
@@ -93,20 +96,20 @@
           - show power inline
         register: agg_switch_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_agg_switch_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.switch_report.txt
-     when: "'distriubution' in group_names"
-     tags:
-      - switch
 
 # ##########################Block for IOS Routers##########################
    - name: For IOS Routers
+     when: "'routers' in group_names"
+     tags:
+      - router
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show version
@@ -126,20 +129,20 @@
           - show inventory
         register: router_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_router_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.router_report.txt
-     when: "'routers' in group_names"
-     tags:
-      - router
 
 # ##########################Block for NXOS##########################
    - name: For NXOS
+     when: "'nexus' in group_names"
+     tags:
+      - nxos
      block:
-      - name: run multiple NXOS commands on remote nodes
+      - name: Run multiple NXOS commands on remote nodes
         cisco.nxos.nxos_command:
          commands:
           - show version
@@ -154,20 +157,20 @@
           - show environment fex all
         register: nxos_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_nexus_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.switch_report.txt
-     when: "'nexus' in group_names"
-     tags:
-      - nxos
 
 # ##########################Block for L3 Core Device L3 Router info##########################
    - name: For L3 Core Switch Router Info
+     when: "'l3cs' in group_names"
+     tags:
+      - l3cs
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show version
@@ -180,22 +183,22 @@
           - show ip route
           - show cdp neighbors
           - show ip protocols
-         register: l3cs_output
+        register: l3cs_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_l3cs_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.l3_core_switch_report.txt
-     when: "'l3cs' in group_names"
-     tags:
-      - l3cs
 
 # ##########################Block for L3 Core Device L2 Switch info##########################
    - name: For L3 Core Switch Switch Info
+     when: "'l3cs' in group_names"
+     tags:
+      - l3cs
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show version
@@ -210,50 +213,47 @@
           - show power inline
         register: l2cs_switch_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_l2cs_switch_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.l2_core_switch_report.txt
-     when: "'l3cs' in group_names"
-     tags:
-      - l3cs
 
 # ##########################Block for WLC info##########################
    - name: For WLC Info
+     when: "'wlc' in group_names"
+     tags:
+      - wlc
      block:
-      - name: run multiple AireOS commands on remote nodes
+      - name: Run multiple AireOS commands on remote nodes
         community.network.aireos_command:
          commands:
           - show version
         register: wlc_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_wlc_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.wlc_report.txt
-     when: "'wlc' in group_names"
-     tags:
-      - wlc
 
 # ##########################Block for FW (ASA) info##########################
    - name: For FW (ASA) Info
+     when: "'fw' in group_names"
+     tags:
+      - fw
      block:
-      - name: run multiple ASA commands on remote nodes
+      - name: Run multiple ASA commands on remote nodes
         cisco.asa.asa_command:
          commands:
           - show version
         register: fw_asa_output
 
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_fw_template.j2
          dest: ./output/{{ inventory_hostname }}.{{ timestamp }}.fw_report.txt
-     when: "'fw' in group_names"
-     tags:
-      - fw
