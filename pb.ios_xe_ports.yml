@@ -1,0 +1,31 @@
+---
+# Authors - Paul Marsh , Michael Johnson
+# Playbook gathers list of interfaces, and their specific configurations, from devices are live and reachable
+- name: Retrieve individual port configurations from Cisco IOS-XE switches
+  hosts: cisco_switches
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+
+    - name: Get list of interfaces
+      cisco.ios.ios_command:
+        commands: "show ip interface brief"
+      register: interface_output
+
+    - name: Parse interface names
+      ansible.builtin.set_fact:
+        interfaces: "{{ interface_output.stdout[0] | regex_findall('^(\\S+)', multiline=True) }}"
+
+    - name: Retrieve interface configurations
+      cisco.ios.ios_command:
+        commands: "show running-config interface {{ item }}"
+      loop: "{{ interfaces }}"
+      register: interface_configs
+
+    - name: Save configurations to a local file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ interface_configs.results | map(attribute='stdout') | list | join('\n') }}"
+        dest: "./interface_configs_{{ inventory_hostname }}.txt"
+        mode: "0644"
