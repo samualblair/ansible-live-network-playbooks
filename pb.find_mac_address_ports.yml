@@ -1,0 +1,61 @@
+---
+# Authors - Michael Johnson - Original Credit to Gerry Maddock @ chr00t[.]com
+# https://chr00t[.]com/using-ansible-to-track-down-exact-port-on-switch-a-mac-address-is-connected-to/
+# Playbook filters mac address tables on Cisco devices, finds ports with MAC Address learned, and outputs port info
+
+- name: Find Mac Address On Switches
+  hosts: all
+  gather_facts: false
+  connection: network_cli
+
+  vars_prompt:
+
+  # Prompt User for which MAC Adress to search for
+   - name: "user_provided_mac_address"
+     prompt: "What is the mac address?"
+     private: false
+
+  tasks:
+
+   - name: "Display Entered Mac Address"
+     ansible.builtin.debug:
+      msg: 'Searching for {{ user_provided_mac_address }}'
+
+   - name: "Search for Mac Address - Access"
+     when: "'access' in group_names"
+     cisco.ios.ios_command:
+      commands:
+       - "show mac address-table | include {{ user_provided_mac_address }}"
+     register: mac_table_command_printout
+
+   - name: "Search for Mac Address - Nexus"
+     when: "'nexus' in group_names"
+     cisco.nxos.nxos_command:
+      commands:
+       - "show mac address-table | include {{ user_provided_mac_address }}"
+     register: mac_table_command_printout
+
+   - name: "Set Interface string"
+     ansible.builtin.set_fact:
+      interface_output_line: |
+        {{mac_table_command_printout.stdout_lines[0] |
+          map('regex_replace','^(?:[^ ]*\ ){12}([^ ]*)') |
+          list }}
+
+   - name: "Show Interface Description - Access"
+     when: "'access' in group_names"
+     cisco.ios.ios_command:
+      commands:
+       - "sh interfaces description | inc {{ interface_output_line[0].strip() }}"
+     register: interface_description_command_printout
+
+   - name: "Show Interface Description - Nexus"
+     when: "'nexus' in group_names"
+     cisco.nxos.nxos_command:
+      commands:
+       - "sh interfaces description | inc {{ interface_output_line[0].strip() }}"
+     register: interface_description_command_printout
+
+   - name: View output
+     ansible.builtin.debug:
+      var: interface_description_command_printout
