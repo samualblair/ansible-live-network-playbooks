@@ -20,16 +20,16 @@
      private: true
 
   tasks:
-   - name: create timestamp
+   - name: Create timestamp
      ansible.builtin.set_fact:
-      timestamp: "{{ lookup('pipe','date +%Y-%m-%d-at-%H--%M--%S') }}"
+      timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d-at-%H--%M--%S') }}"
 # removed the colon ":" in timestamp as windows has issues with this when accessing saved files and replaced with double dashes "--"
 
 ## Create folder to store output if not present
-   - name: create directory for output
+   - name: Create directory for output
      ansible.builtin.file:
       # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-      mode: 0644
+      mode: "0644"
       path: ./output
       state: directory
 
@@ -37,7 +37,7 @@
 # #########################Block for IOS Access Switches##########################
    - name: For IOS Switches - Access
      block:
-      - name: run multiple IOS commands on remote nodes
+      - name: Run multiple IOS commands on remote nodes
         cisco.ios.ios_command:
          commands:
           - show environment all
@@ -49,10 +49,10 @@
       # when: "'distriubution' in group_names"
 
       # Output for the previous command for all switches is included in one report
-      - name: show output to files
+      - name: Show output to files
         ansible.builtin.template:
          # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-         mode: 0644
+         mode: "0644"
          src: ./templates/output_temp_template.j2
          dest: ./output/full_temperature_report.csv
 
