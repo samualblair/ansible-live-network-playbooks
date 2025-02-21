@@ -1,6 +1,7 @@
 ---
 # Authors - Paul Marsh , Michael Johnson
 # Playbook gathers list of interfaces, and their specific configurations, from devices are live and reachable
+
 - name: Retrieve individual port configurations from Cisco IOS-XE switches
   hosts: cisco_switches
   gather_facts: false
@@ -15,7 +16,10 @@
 
     - name: Parse interface names
       ansible.builtin.set_fact:
-        interfaces: "{{ interface_output.stdout[0] | regex_findall('^(\\S+)', multiline=True) }}"
+        interfaces: >
+          "{{ interface_output.stdout[0] | regex_findall('^(GigabitEthernet\\d+/\\d+/\\d+|
+          FastEthernet\\d+/\\d+|TenGigabitEthernet\\d+/\\d+/\\d+|
+          Loopback\\d+|Vlan\\d+|Port-channel\\d+)', multiline=True) }}"
 
     - name: Retrieve interface configurations
       cisco.ios.ios_command:
@@ -23,9 +27,16 @@
       loop: "{{ interfaces }}"
       register: interface_configs
 
+    - name: Pass to Python to parse output
+      delegate_to: localhost
+      ansible.builtin.script:
+        cmd: ./scripts/string_list_parse.py "{{ interface_output }}"
+        executable: /usr/bin/python3
+      register: python_formatted
+
     - name: Save configurations to a local file
       delegate_to: localhost
       ansible.builtin.copy:
-        content: "{{ interface_configs.results | map(attribute='stdout') | list | join('\n') }}"
-        dest: "./interface_configs_{{ inventory_hostname }}.txt"
+        content: "{{ python_formatted.stdout }}"
+        dest: "./output/{{ ansible_host }}_interface_configurations.txt"
         mode: "0644"
