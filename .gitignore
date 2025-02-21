@@ -1,2 +1,4 @@
 .DS_Store
 context/*
+.vscode/settings.json
+testing/*
