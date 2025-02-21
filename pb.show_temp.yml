@@ -29,7 +29,7 @@
    - name: Create directory for output
      ansible.builtin.file:
       # Set permissions using octal so leading 0 , set to User=RW , Group=R , Other=R
-      mode: "0644"
+      mode: "0755"
       path: ./output
       state: directory
 
